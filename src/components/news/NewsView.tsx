@@ -15,13 +15,13 @@ export function NewsView() {
   const { toast } = useToast();
   
   const rssSources = {
-    "the-daily": {
-      name: "The Daily",
+    "cnn": {
+      name: "CNN News",
       feeds: {
-        "episodes": "http://rss.art19.com/the-daily",
-        "recent": "http://rss.art19.com/the-daily?limit=10",
-        "popular": "http://rss.art19.com/the-daily",
-        "featured": "http://rss.art19.com/the-daily",
+        "top": "http://rss.cnn.com/rss/cnn_topstories.rss",
+        "world": "http://rss.cnn.com/rss/cnn_world.rss",
+        "business": "http://rss.cnn.com/rss/money_latest.rss",
+        "technology": "http://rss.cnn.com/rss/cnn_tech.rss",
       }
     },
     "bbc": {
@@ -119,7 +119,7 @@ export function NewsView() {
 
   // Load initial data
   useEffect(() => {
-    // Default to BBC as it's more reliable than podcast feeds
+    // Default to BBC as it's more reliable
     const savedSource = localStorage.getItem('news-source') || "bbc";
     setSelectedFeed(savedSource);
     

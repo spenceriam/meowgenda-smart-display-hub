@@ -57,10 +57,10 @@ export async function fetchRssFeed(feedUrl: string, category: string): Promise<N
 // Add mock news data as a fallback
 export const getMockNews = (category: string): NewsArticle[] => {
   const mockTitles = {
-    "the-daily": [
-      "Today's Top Story from The Daily",
-      "Breaking News Coverage",
-      "Expert Analysis on Current Events"
+    "cnn": [
+      "Breaking News from CNN",
+      "Global News Coverage by CNN",
+      "Top Stories of the Day - CNN"
     ],
     "bbc": [
       "Global News Update from BBC",
@@ -74,7 +74,7 @@ export const getMockNews = (category: string): NewsArticle[] => {
     ]
   };
   
-  const source = category.includes("episode") || category.includes("recent") ? "The Daily" :
+  const source = category.includes("world") ? "World News" :
                 category.includes("top") ? "Top Headlines" :
                 category.includes("business") ? "Business News" :
                 category.includes("health") ? "Health Updates" :
@@ -82,7 +82,7 @@ export const getMockNews = (category: string): NewsArticle[] => {
   
   return Array(3).fill(null).map((_, i) => ({
     id: uuidv4(),
-    title: mockTitles[source.toLowerCase().includes("daily") ? "the-daily" : 
+    title: mockTitles[source.toLowerCase().includes("cnn") ? "cnn" : 
                      source.toLowerCase().includes("bbc") ? "bbc" : "npr"][i % 3],
     summary: `This is a fallback article for the ${category} category. We couldn't load the actual content from ${source} at this time. Please try again later or check your internet connection.`,
     url: "#",
