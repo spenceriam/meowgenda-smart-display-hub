@@ -68,10 +68,6 @@ export function Sidebar({
             {isMobile && <div className="dynapuff-heading text-2xl text-primary">
                 meowgenda
               </div>}
-            {/* Moved the mobile button to the bottom */}
-            {!isMobile && <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} className="mx-auto mt-2 rounded-full">
-              <Menu size={20} />
-            </Button>}
           </div>
 
           <nav className="flex-1 py-4">
@@ -102,8 +98,13 @@ export function Sidebar({
                 </Button>
               </div>
             ) : (
-              <div className="dynapuff-text text-primary text-2xl text-center transform -rotate-90 origin-center my-4">
-                meowgenda
+              <div className="flex flex-col items-center space-y-4">
+                <div className="dynapuff-text text-primary text-2xl text-center transform -rotate-90 origin-center my-4">
+                  meowgenda
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} className="rounded-full">
+                  <Menu size={20} />
+                </Button>
               </div>
             )}
           </div>
