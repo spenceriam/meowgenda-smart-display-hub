@@ -5,10 +5,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Settings } from "@/types";
-import { Apple, Calendar, Mail, Moon, Sun } from "lucide-react";
+import { Apple, Calendar, Mail, Moon, Sun, Palette } from "lucide-react";
 import ColorSelector from "./ColorSelector";
+import CustomColorPicker from "./CustomColorPicker";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 
 export function SettingsView() {
+  const { toast } = useToast();
   const [settings, setSettings] = React.useState<Settings>(() => {
     const saved = localStorage.getItem('app-settings');
     return saved ? JSON.parse(saved) : {
@@ -44,7 +48,67 @@ export function SettingsView() {
     } else {
       document.body.style.backgroundImage = "";
     }
+
+    // Apply primary color
+    document.documentElement.style.setProperty('--primary', settings.primaryColor);
+    document.documentElement.style.setProperty('--primary-rgb', hexToRGB(settings.primaryColor));
+    
+    // Create a style element for custom CSS variables
+    let styleEl = document.getElementById('primary-color-style');
+    if (!styleEl) {
+      styleEl = document.createElement('style');
+      styleEl.id = 'primary-color-style';
+      document.head.appendChild(styleEl);
+    }
+    
+    // Update the CSS with the new primary color
+    styleEl.textContent = `
+      :root {
+        --primary: ${settings.primaryColor};
+        --primary-rgb: ${hexToRGB(settings.primaryColor)};
+      }
+      
+      .bg-primary {
+        background-color: ${settings.primaryColor} !important;
+      }
+      
+      .text-primary {
+        color: ${settings.primaryColor} !important;
+      }
+      
+      .border-primary {
+        border-color: ${settings.primaryColor} !important;
+      }
+
+      .hover\\:bg-primary:hover {
+        background-color: ${settings.primaryColor} !important;
+      }
+
+      .ring-primary {
+        --tw-ring-color: ${settings.primaryColor} !important;
+      }
+    `;
   }, [settings]);
+
+  // Helper function to convert hex to RGB
+  const hexToRGB = (hex: string): string => {
+    let r = 0, g = 0, b = 0;
+    
+    // 3 digits
+    if (hex.length === 4) {
+      r = parseInt(hex[1] + hex[1], 16);
+      g = parseInt(hex[2] + hex[2], 16);
+      b = parseInt(hex[3] + hex[3], 16);
+    } 
+    // 6 digits
+    else if (hex.length === 7) {
+      r = parseInt(hex.substring(1, 3), 16);
+      g = parseInt(hex.substring(3, 5), 16);
+      b = parseInt(hex.substring(5, 7), 16);
+    }
+    
+    return `${r}, ${g}, ${b}`;
+  };
 
   const toggleTheme = () => {
     setSettings(prev => ({
@@ -58,6 +122,11 @@ export function SettingsView() {
       ...prev,
       primaryColor: color
     }));
+    
+    toast({
+      title: "Primary Color Updated",
+      description: "The primary color has been updated successfully."
+    });
   };
 
   const toggleCustomBackground = () => {
@@ -135,6 +204,11 @@ export function SettingsView() {
         outlook: false
       }
     });
+    
+    toast({
+      title: "Settings Reset",
+      description: "All settings have been reset to their default values."
+    });
   };
 
   // Make sure connectedCalendars exists before trying to access its properties
@@ -180,21 +254,35 @@ export function SettingsView() {
               </div>
             </div>
             
+            <Separator />
+            
             <div className="space-y-2">
               <Label>Primary Color</Label>
+              <p className="text-sm text-muted-foreground mb-2">
+                Choose a primary color for the application
+              </p>
               <ColorSelector
                 value={settings.primaryColor}
                 onChange={setPrimaryColor}
                 colors={[
                   "#50C2A7",
-                  "#E5DEFF",
-                  "#FEF7CD",
-                  "#FFDEE2",
-                  "#FDE1D3",
-                  "#D3E4FD",
+                  "#9b87f5",
+                  "#F97316",
+                  "#D946EF",
+                  "#0EA5E9",
+                  "#8B5CF6",
                 ]}
               />
+              
+              <div className="mt-4">
+                <CustomColorPicker 
+                  value={settings.primaryColor} 
+                  onChange={setPrimaryColor}
+                />
+              </div>
             </div>
+            
+            <Separator />
             
             <div className="flex justify-between items-center">
               <div className="space-y-0.5">
