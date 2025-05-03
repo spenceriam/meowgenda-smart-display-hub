@@ -112,7 +112,7 @@ export function Sidebar({
       </aside>
 
       {/* Toggle button for non-mobile */}
-      {!isMobile && !open && <Button variant="ghost" size="icon" onClick={() => setOpen(true)} className="fixed top-4 left-4 z-30 rounded-full shadow-md bg-background/60 backdrop-blur-md">
+      {!isMobile && !open && <Button variant="ghost" size="icon" onClick={() => setOpen(true)} className="fixed bottom-4 left-4 z-30 rounded-full shadow-md bg-background/60 backdrop-blur-md">
           <Menu size={20} />
         </Button>}
     </>;
