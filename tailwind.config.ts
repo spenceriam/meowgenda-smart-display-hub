@@ -112,7 +112,8 @@ export default {
 				'slide-in': 'slide-in 0.4s ease-out'
 			},
 			fontFamily: {
-				sans: ['Inter', 'sans-serif']
+				sans: ['Inter', 'sans-serif'],
+				dynapuff: ['"DynaPuff"', 'cursive'],
 			}
 		}
 	},
