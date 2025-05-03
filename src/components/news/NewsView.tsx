@@ -1,14 +1,12 @@
 
 import React, { useEffect } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { NewsArticle } from "@/types";
-import NewsCard from "./NewsCard";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Rss } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { fetchRssFeed, getMockNews } from "@/lib/news";
-import { Skeleton } from "@/components/ui/skeleton";
+import { NewsArticle } from "@/types";
+import { NewsSourceSelector } from "./NewsSourceSelector";
+import { NewsCategoryTabs } from "./NewsCategoryTabs";
 
 export function NewsView() {
   const [newsArticles, setNewsArticles] = React.useState<Record<string, NewsArticle[]>>({});
@@ -146,56 +144,18 @@ export function NewsView() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
-        {Object.keys(rssSources).map((source) => (
-          <Button
-            key={source}
-            variant={selectedFeed === source ? "default" : "outline"}
-            onClick={() => handleSourceChange(source)}
-            disabled={isLoading}
-          >
-            {rssSources[source as keyof typeof rssSources].name}
-          </Button>
-        ))}
-      </div>
+      <NewsSourceSelector
+        sources={rssSources}
+        selectedFeed={selectedFeed}
+        isLoading={isLoading}
+        onSourceChange={handleSourceChange}
+      />
 
-      <Tabs defaultValue={categories[0]}>
-        <TabsList className="mb-6">
-          {categories.map(category => (
-            <TabsTrigger key={category} value={category} className="capitalize">
-              {category}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-        
-        {categories.map(category => (
-          <TabsContent key={category} value={category} className="space-y-4">
-            {isLoading ? (
-              <div className="space-y-4">
-                {[1, 2, 3].map(i => (
-                  <Card key={i}>
-                    <CardHeader className="pb-2">
-                      <Skeleton className="w-3/4 h-6" />
-                      <Skeleton className="w-2/4 h-4 mt-2" />
-                    </CardHeader>
-                    <CardContent>
-                      <Skeleton className="w-full h-4" />
-                      <Skeleton className="w-full h-4 mt-2" />
-                      <Skeleton className="w-2/3 h-4 mt-2" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : newsArticles[category] ? (
-              newsArticles[category].map(article => (
-                <NewsCard key={article.id} article={article} />
-              ))
-            ) : (
-              <p className="text-center text-muted-foreground py-4">No articles available in this category</p>
-            )}
-          </TabsContent>
-        ))}
-      </Tabs>
+      <NewsCategoryTabs
+        categories={categories}
+        newsArticles={newsArticles}
+        isLoading={isLoading}
+      />
     </div>
   );
 }
