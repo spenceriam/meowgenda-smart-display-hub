@@ -271,7 +271,7 @@ export function SettingsView() {
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <Google className="h-5 w-5 text-red-500" />
+                <Calendar className="h-5 w-5 text-red-500" />
                 <div className="space-y-0.5">
                   <Label>Google Calendar</Label>
                   <p className="text-sm text-muted-foreground">
@@ -309,7 +309,7 @@ export function SettingsView() {
             
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-3">
-                <Outlook className="h-5 w-5 text-blue-500" />
+                <Mail className="h-5 w-5 text-blue-500" />
                 <div className="space-y-0.5">
                   <Label>Outlook Calendar</Label>
                   <p className="text-sm text-muted-foreground">
