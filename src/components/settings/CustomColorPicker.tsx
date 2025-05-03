@@ -43,12 +43,14 @@ export default function CustomColorPicker({ value, onChange }: CustomColorPicker
       <PopoverContent className="w-80">
         <div className="space-y-4">
           <div>
-            <input
-              type="color"
-              value={customColor}
-              onChange={handleColorChange}
-              className="w-full h-40 cursor-pointer rounded-md mb-3"
-            />
+            <div className="w-full mb-4 border rounded-md overflow-hidden">
+              <input
+                type="color"
+                value={customColor}
+                onChange={handleColorChange}
+                className="w-full h-40 cursor-pointer border-0 p-0 m-0"
+              />
+            </div>
           </div>
           
           <div className="space-y-2">
