@@ -3,13 +3,18 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { WeatherData } from "@/types";
 import WeatherIcon from "./WeatherIcon";
 import WeatherForecast from "./WeatherForecast";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useToast } from "@/hooks/use-toast";
 
 export function WeatherView() {
+  const { toast } = useToast();
   const [location, setLocation] = React.useState("");
+  const [isLocating, setIsLocating] = React.useState(false);
+  const [units, setUnits] = React.useState<"metric" | "imperial">("metric"); // metric: C/km/h, imperial: F/mph
   const [weather, setWeather] = React.useState<WeatherData | null>(() => {
     const saved = localStorage.getItem('weather');
     if (saved) return JSON.parse(saved);
@@ -111,10 +116,122 @@ export function WeatherView() {
     }, 500);
   };
 
+  const getUserLocation = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: "Geolocation not supported",
+        description: "Your browser doesn't support location services.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // In a real app, you'd use these coordinates to fetch weather data
+        // For this demo, we'll simulate with random data
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        
+        // Simulate a location-based weather search
+        setTimeout(() => {
+          const mockWeather: WeatherData = {
+            location: {
+              name: "Your Location",
+              country: "Current Position"
+            },
+            current: {
+              temp_c: Math.round(15 + Math.random() * 15),
+              temp_f: Math.round(59 + Math.random() * 27),
+              condition: {
+                text: ["Sunny", "Partly cloudy", "Cloudy", "Light rain"][Math.floor(Math.random() * 4)],
+                code: [1000, 1003, 1006, 1063][Math.floor(Math.random() * 4)]
+              },
+              wind_mph: Math.round(5 + Math.random() * 15),
+              wind_kph: Math.round(8 + Math.random() * 24),
+              humidity: Math.round(40 + Math.random() * 40),
+              feelslike_c: Math.round(14 + Math.random() * 15),
+              feelslike_f: Math.round(57 + Math.random() * 27)
+            },
+            forecast: [
+              { 
+                date: "2023-05-04", 
+                maxtemp_c: Math.round(18 + Math.random() * 10),
+                mintemp_c: Math.round(10 + Math.random() * 8),
+                condition: { 
+                  text: ["Sunny", "Partly cloudy"][Math.floor(Math.random() * 2)],
+                  code: [1000, 1003][Math.floor(Math.random() * 2)]
+                }
+              },
+              { 
+                date: "2023-05-05", 
+                maxtemp_c: Math.round(18 + Math.random() * 10),
+                mintemp_c: Math.round(10 + Math.random() * 8),
+                condition: { 
+                  text: ["Cloudy", "Light rain"][Math.floor(Math.random() * 2)], 
+                  code: [1006, 1063][Math.floor(Math.random() * 2)]
+                }
+              },
+              { 
+                date: "2023-05-06", 
+                maxtemp_c: Math.round(18 + Math.random() * 10),
+                mintemp_c: Math.round(10 + Math.random() * 8), 
+                condition: { 
+                  text: ["Sunny", "Light rain"][Math.floor(Math.random() * 2)],
+                  code: [1000, 1063][Math.floor(Math.random() * 2)]
+                }
+              },
+            ]
+          };
+          
+          setWeather(mockWeather);
+          toast({
+            title: "Location detected",
+            description: `Weather for your current location (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`,
+          });
+          setIsLocating(false);
+        }, 1000);
+      },
+      (error) => {
+        setIsLocating(false);
+        let message = "Failed to get your location";
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            message = "Location permission denied. Please enable location services.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            message = "Location information unavailable. Try again later.";
+            break;
+          case error.TIMEOUT:
+            message = "Location request timed out. Try again later.";
+            break;
+        }
+        
+        toast({
+          title: "Location error",
+          description: message,
+          variant: "destructive",
+        });
+      }
+    );
+  };
+
   return (
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Weather</h1>
+        <ToggleGroup 
+          type="single" 
+          value={units} 
+          onValueChange={(value) => {
+            if (value) setUnits(value as "metric" | "imperial");
+          }}
+        >
+          <ToggleGroupItem value="metric">°C / km/h</ToggleGroupItem>
+          <ToggleGroupItem value="imperial">°F / mph</ToggleGroupItem>
+        </ToggleGroup>
       </div>
 
       <div className="mb-6">
@@ -129,6 +246,15 @@ export function WeatherView() {
             />
           </div>
           <Button type="submit" disabled={!location.trim()}>Search</Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={getUserLocation} 
+            disabled={isLocating}
+          >
+            <MapPin className="h-4 w-4 mr-2" />
+            {isLocating ? "Detecting..." : "Use my location"}
+          </Button>
         </form>
       </div>
 
@@ -142,8 +268,11 @@ export function WeatherView() {
                   <p>{weather.location.country}</p>
                 </div>
                 <div className="text-right">
-                  <div className="text-5xl font-bold">{weather.current.temp_c}°C</div>
-                  <div className="text-lg">{weather.current.temp_f}°F</div>
+                  <div className="text-5xl font-bold">
+                    {units === "metric" 
+                      ? `${weather.current.temp_c}°C` 
+                      : `${weather.current.temp_f}°F`}
+                  </div>
                 </div>
               </div>
               
@@ -151,7 +280,11 @@ export function WeatherView() {
                 <WeatherIcon code={weather.current.condition.code} className="h-16 w-16 mr-4" />
                 <div>
                   <div className="text-xl">{weather.current.condition.text}</div>
-                  <div>Feels like {weather.current.feelslike_c}°C</div>
+                  <div>
+                    Feels like {units === "metric" 
+                      ? `${weather.current.feelslike_c}°C` 
+                      : `${weather.current.feelslike_f}°F`}
+                  </div>
                 </div>
               </div>
             </div>
@@ -160,7 +293,11 @@ export function WeatherView() {
               <div className="grid grid-cols-3 gap-4 text-center">
                 <div>
                   <p className="text-muted-foreground text-sm">Wind</p>
-                  <p className="font-medium">{weather.current.wind_kph} km/h</p>
+                  <p className="font-medium">
+                    {units === "metric" 
+                      ? `${weather.current.wind_kph} km/h` 
+                      : `${weather.current.wind_mph} mph`}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm">Humidity</p>
@@ -168,7 +305,11 @@ export function WeatherView() {
                 </div>
                 <div>
                   <p className="text-muted-foreground text-sm">Feels Like</p>
-                  <p className="font-medium">{weather.current.feelslike_c}°C</p>
+                  <p className="font-medium">
+                    {units === "metric" 
+                      ? `${weather.current.feelslike_c}°C` 
+                      : `${weather.current.feelslike_f}°F`}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -179,7 +320,7 @@ export function WeatherView() {
               <CardTitle>3-Day Forecast</CardTitle>
             </CardHeader>
             <CardContent>
-              <WeatherForecast forecast={weather.forecast} />
+              <WeatherForecast forecast={weather.forecast} units={units} />
             </CardContent>
           </Card>
         </div>
@@ -187,7 +328,7 @@ export function WeatherView() {
         <Card className="text-center py-16">
           <CardContent>
             <p className="text-muted-foreground">
-              {location ? "Loading weather data..." : "Search for a location to view weather"}
+              {location || isLocating ? "Loading weather data..." : "Search for a location to view weather"}
             </p>
           </CardContent>
         </Card>
