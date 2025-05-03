@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,18 +8,16 @@ import WeatherIcon from "./WeatherIcon";
 import WeatherForecast from "./WeatherForecast";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
 
 export function WeatherView() {
   const { toast } = useToast();
   const [location, setLocation] = React.useState("");
   const [isLocating, setIsLocating] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
-  const [apiKey, setApiKey] = React.useState(() => localStorage.getItem("weatherApiKey") || "");
   const [units, setUnits] = React.useState<"metric" | "imperial">(() => {
     return localStorage.getItem("weatherUnits") as "metric" | "imperial" || "metric";
   });
-  const [showApiKeyDialog, setShowApiKeyDialog] = React.useState(false);
   const [weather, setWeather] = React.useState<WeatherData | null>(() => {
     const saved = localStorage.getItem('weather');
     if (saved) return JSON.parse(saved);
@@ -62,35 +59,22 @@ export function WeatherView() {
     localStorage.setItem('weatherUnits', units);
   }, [units]);
 
-  const saveApiKey = (key: string) => {
-    setApiKey(key);
-    localStorage.setItem("weatherApiKey", key);
-    setShowApiKeyDialog(false);
-    toast({
-      title: "API Key Saved",
-      description: "Your WeatherAPI key has been saved securely to your browser.",
-    });
-  };
-
   const fetchWeatherData = async (searchLocation: string) => {
-    if (!apiKey) {
-      setShowApiKeyDialog(true);
-      return;
-    }
-
     setIsLoading(true);
     
     try {
-      // Real API call to WeatherAPI.com
-      const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${encodeURIComponent(searchLocation)}&days=3&aqi=no&alerts=no`;
+      // Call the Supabase Edge Function instead of directly calling WeatherAPI
+      const { data, error } = await supabase.functions.invoke('weather', {
+        body: { location: searchLocation }
+      });
       
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        throw new Error(`Weather API error: ${response.status}`);
+      if (error) {
+        throw new Error(`Error calling weather function: ${error.message}`);
       }
       
-      const data = await response.json();
+      if (!data) {
+        throw new Error('No data returned from the weather function');
+      }
       
       // Transform API data to match our WeatherData type
       const weatherData: WeatherData = {
@@ -209,35 +193,6 @@ export function WeatherView() {
             <ToggleGroupItem value="metric">°C / km/h</ToggleGroupItem>
             <ToggleGroupItem value="imperial">°F / mph</ToggleGroupItem>
           </ToggleGroup>
-          
-          <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Settings className="h-4 w-4" />
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Weather API Settings</DialogTitle>
-                <DialogDescription>
-                  Enter your WeatherAPI.com API key. Sign up at <a href="https://www.weatherapi.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">weatherapi.com</a>
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Input
-                    id="apiKey"
-                    placeholder="Your API Key"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                  />
-                </div>
-                <Button onClick={() => saveApiKey(apiKey)} disabled={!apiKey.trim()}>
-                  Save
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
 
@@ -264,19 +219,6 @@ export function WeatherView() {
           </Button>
         </form>
       </div>
-
-      {!apiKey && !weather && (
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <div className="text-center space-y-2">
-              <p>You need a WeatherAPI.com API key to fetch weather data.</p>
-              <Button onClick={() => setShowApiKeyDialog(true)}>
-                Set API Key
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {isLoading ? (
         <Card className="text-center py-16">
