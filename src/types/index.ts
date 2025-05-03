@@ -87,4 +87,9 @@ export interface Settings {
   backgroundUrl: string;
   screenLockEnabled: boolean;
   screenLockTimeout: number;
+  connectedCalendars: {
+    google: boolean;
+    apple: boolean;
+    outlook: boolean;
+  };
 }

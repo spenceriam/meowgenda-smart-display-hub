@@ -1,11 +1,10 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Settings } from "@/types";
-import { Moon, Sun } from "lucide-react";
+import { Apple, Calendar, Google, Mail, Moon, Outlook, Sun } from "lucide-react";
 import ColorSelector from "./ColorSelector";
 
 export function SettingsView() {
@@ -17,7 +16,12 @@ export function SettingsView() {
       useCustomBackground: false,
       backgroundUrl: "",
       screenLockEnabled: false,
-      screenLockTimeout: 5
+      screenLockTimeout: 5,
+      connectedCalendars: {
+        google: false,
+        apple: false,
+        outlook: false
+      }
     };
   });
 
@@ -83,6 +87,32 @@ export function SettingsView() {
     }));
   };
 
+  const connectCalendarService = (service: 'google' | 'apple' | 'outlook') => {
+    // This would typically open an OAuth flow in a real application
+    const isConnected = settings.connectedCalendars[service];
+    
+    if (isConnected) {
+      // Disconnect
+      setSettings(prev => ({
+        ...prev,
+        connectedCalendars: {
+          ...prev.connectedCalendars,
+          [service]: false
+        }
+      }));
+    } else {
+      // In a real app, we'd trigger the OAuth flow here
+      // For now, just simulate a connection
+      setSettings(prev => ({
+        ...prev,
+        connectedCalendars: {
+          ...prev.connectedCalendars,
+          [service]: true
+        }
+      }));
+    }
+  };
+
   const resetSettings = () => {
     setSettings({
       theme: "light",
@@ -90,7 +120,12 @@ export function SettingsView() {
       useCustomBackground: false,
       backgroundUrl: "",
       screenLockEnabled: false,
-      screenLockTimeout: 5
+      screenLockTimeout: 5,
+      connectedCalendars: {
+        google: false,
+        apple: false,
+        outlook: false
+      }
     });
   };
 
@@ -225,6 +260,71 @@ export function SettingsView() {
                 </div>
               </div>
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Calendar Integrations</CardTitle>
+            <CardDescription>Connect to third-party calendar services</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <Google className="h-5 w-5 text-red-500" />
+                <div className="space-y-0.5">
+                  <Label>Google Calendar</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Sync events with your Google Calendar
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant={settings.connectedCalendars.google ? "destructive" : "outline"}
+                onClick={() => connectCalendarService('google')}
+                className="min-w-24"
+              >
+                {settings.connectedCalendars.google ? "Disconnect" : "Connect"}
+              </Button>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <Apple className="h-5 w-5" />
+                <div className="space-y-0.5">
+                  <Label>Apple Calendar</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Sync events with your Apple Calendar
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant={settings.connectedCalendars.apple ? "destructive" : "outline"}
+                onClick={() => connectCalendarService('apple')}
+                className="min-w-24"
+              >
+                {settings.connectedCalendars.apple ? "Disconnect" : "Connect"}
+              </Button>
+            </div>
+            
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <Outlook className="h-5 w-5 text-blue-500" />
+                <div className="space-y-0.5">
+                  <Label>Outlook Calendar</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Sync events with your Outlook Calendar
+                  </p>
+                </div>
+              </div>
+              <Button 
+                variant={settings.connectedCalendars.outlook ? "destructive" : "outline"}
+                onClick={() => connectCalendarService('outlook')}
+                className="min-w-24"
+              >
+                {settings.connectedCalendars.outlook ? "Disconnect" : "Connect"}
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
