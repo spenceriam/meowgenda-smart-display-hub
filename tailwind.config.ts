@@ -113,7 +113,7 @@ export default {
 			},
 			fontFamily: {
 				sans: ['Inter', 'sans-serif'],
-				dynapuff: ['"DynaPuff"', 'cursive'],
+				dynapuff: ['"DynaPuff"', 'system-ui', 'sans-serif'],
 			}
 		}
 	},
