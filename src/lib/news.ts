@@ -5,43 +5,35 @@ import { v4 as uuidv4 } from "uuid";
 // Helper function to parse RSS and convert to our NewsArticle format
 export async function fetchRssFeed(feedUrl: string, category: string): Promise<NewsArticle[]> {
   try {
-    // Use a CORS proxy for client-side requests
-    const corsProxy = "https://api.allorigins.win/raw?url=";
+    // Use a more reliable CORS proxy for client-side requests
+    const corsProxy = "https://api.rss2json.com/v1/api.json?rss_url=";
     const response = await fetch(`${corsProxy}${encodeURIComponent(feedUrl)}`);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch RSS feed: ${response.statusText}`);
     }
     
-    const text = await response.text();
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(text, "text/xml");
+    const data = await response.json();
     
-    // Get all items from the RSS feed
-    const items = xmlDoc.querySelectorAll("item");
+    // Check if the API returned proper data
+    if (data.status !== "ok") {
+      throw new Error(`API returned error: ${data.message || "Unknown error"}`);
+    }
     
     // Convert items to NewsArticle format
-    const articles: NewsArticle[] = Array.from(items).slice(0, 8).map(item => {
-      const title = item.querySelector("title")?.textContent || "No Title";
-      const link = item.querySelector("link")?.textContent || "#";
-      const description = item.querySelector("description")?.textContent || "";
-      const pubDate = item.querySelector("pubDate")?.textContent || new Date().toISOString();
-      
-      // Strip HTML tags from description for the summary
+    const articles: NewsArticle[] = data.items.slice(0, 8).map((item: any) => {
+      // Extract text from HTML content for the summary
       const div = document.createElement("div");
-      div.innerHTML = description;
+      div.innerHTML = item.description || item.content || "";
       const summary = div.textContent?.trim().substring(0, 200) + "..." || "No summary available";
-      
-      // Extract source from the feed URL or use a default
-      const source = new URL(feedUrl).hostname.replace("feeds.", "").replace("www.", "");
       
       return {
         id: uuidv4(),
-        title,
-        summary,
-        url: link,
-        source,
-        publishedAt: new Date(pubDate).toISOString(),
+        title: item.title || "No Title",
+        summary: summary,
+        url: item.link || "#",
+        source: data.feed.title || new URL(feedUrl).hostname.replace("feeds.", "").replace("www.", ""),
+        publishedAt: item.pubDate || new Date().toISOString(),
         category
       };
     });
@@ -52,3 +44,27 @@ export async function fetchRssFeed(feedUrl: string, category: string): Promise<N
     return [];
   }
 }
+
+// Add mock news data as a fallback
+export const getMockNews = (category: string): NewsArticle[] => {
+  return [
+    {
+      id: uuidv4(),
+      title: "Sample News Article",
+      summary: "This is a sample news article that appears when we can't load real news. The RSS feed may be temporarily unavailable.",
+      url: "#",
+      source: "Fallback Source",
+      publishedAt: new Date().toISOString(),
+      category
+    },
+    {
+      id: uuidv4(),
+      title: "Unable to Load News Feed",
+      summary: "We're having trouble connecting to the news sources. Please try again later or check your internet connection.",
+      url: "#",
+      source: "System Message",
+      publishedAt: new Date().toISOString(),
+      category
+    }
+  ];
+};

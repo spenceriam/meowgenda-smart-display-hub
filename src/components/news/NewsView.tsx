@@ -5,9 +5,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NewsArticle } from "@/types";
 import NewsCard from "./NewsCard";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Rss } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { fetchRssFeed } from "@/lib/news";
+import { fetchRssFeed, getMockNews } from "@/lib/news";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function NewsView() {
   const [newsArticles, setNewsArticles] = React.useState<Record<string, NewsArticle[]>>({});
@@ -53,7 +54,13 @@ export function NewsView() {
       
       const articlesPromises = categories.map(async (category) => {
         const feedUrl = sourceFeeds[category as keyof typeof sourceFeeds];
-        const articles = await fetchRssFeed(feedUrl, category);
+        let articles = await fetchRssFeed(feedUrl, category);
+        
+        // Use mock data if no articles were fetched
+        if (articles.length === 0) {
+          articles = getMockNews(category);
+        }
+        
         return { category, articles };
       });
       
@@ -76,13 +83,21 @@ export function NewsView() {
       console.error("Error fetching news:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch news. Please try again later.",
+        description: "Failed to fetch news. Using cached or fallback data.",
         variant: "destructive",
       });
       // If fetch fails, load from localStorage or use fallback data
       const saved = localStorage.getItem('news-articles');
       if (saved) {
         setNewsArticles(JSON.parse(saved));
+      } else {
+        // Create fallback data with mock news for each category
+        const fallbackData: Record<string, NewsArticle[]> = {};
+        const categories = ["top", "business", "health", "technology"];
+        categories.forEach(category => {
+          fallbackData[category] = getMockNews(category);
+        });
+        setNewsArticles(fallbackData);
       }
     } finally {
       setIsLoading(false);
@@ -115,7 +130,10 @@ export function NewsView() {
   return (
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">News</h1>
+        <div className="flex items-center">
+          <h1 className="text-3xl font-bold">News</h1>
+          <Rss className="ml-2 h-5 w-5 text-muted-foreground" />
+        </div>
         <div className="flex gap-2 items-center">
           <Button 
             variant="outline" 
@@ -157,11 +175,13 @@ export function NewsView() {
                 {[1, 2, 3].map(i => (
                   <Card key={i}>
                     <CardHeader className="pb-2">
-                      <div className="w-3/4 h-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                      <div className="w-2/4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mt-2" />
+                      <Skeleton className="w-3/4 h-6" />
+                      <Skeleton className="w-2/4 h-4 mt-2" />
                     </CardHeader>
                     <CardContent>
-                      <div className="w-full h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                      <Skeleton className="w-full h-4" />
+                      <Skeleton className="w-full h-4 mt-2" />
+                      <Skeleton className="w-2/3 h-4 mt-2" />
                     </CardContent>
                   </Card>
                 ))}
