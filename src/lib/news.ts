@@ -31,7 +31,7 @@ export async function fetchRssFeed(feedUrl: string, category: string): Promise<N
         id: uuidv4(),
         title: item.title || "No Title",
         summary: summary,
-        url: item.link || "#",
+        url: item.link || item.enclosure?.link || "#",
         source: data.feed.title || new URL(feedUrl).hostname.replace("feeds.", "").replace("www.", ""),
         publishedAt: item.pubDate || new Date().toISOString(),
         category

@@ -13,17 +13,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function NewsView() {
   const [newsArticles, setNewsArticles] = React.useState<Record<string, NewsArticle[]>>({});
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [selectedFeed, setSelectedFeed] = React.useState<string>("reuters");
+  const [selectedFeed, setSelectedFeed] = React.useState<string>("the-daily");
   const { toast } = useToast();
   
   const rssSources = {
-    "reuters": {
-      name: "Reuters",
+    "the-daily": {
+      name: "The Daily",
       feeds: {
-        "top": "https://www.reutersagency.com/feed/?taxonomy=best-topics&post_type=best",
-        "business": "https://www.reutersagency.com/feed/?best-topics=business&post_type=best",
-        "health": "https://www.reutersagency.com/feed/?best-topics=health&post_type=best",
-        "technology": "https://www.reutersagency.com/feed/?best-topics=tech&post_type=best",
+        "episodes": "http://rss.art19.com/the-daily",
+        "recent": "http://rss.art19.com/the-daily",
+        "popular": "http://rss.art19.com/the-daily",
+        "featured": "http://rss.art19.com/the-daily",
       }
     },
     "bbc": {
@@ -77,13 +77,13 @@ export function NewsView() {
       
       toast({
         title: "News Updated",
-        description: `Latest news from ${rssSources[source as keyof typeof rssSources].name} loaded`,
+        description: `Latest content from ${rssSources[source as keyof typeof rssSources].name} loaded`,
       });
     } catch (error) {
       console.error("Error fetching news:", error);
       toast({
         title: "Error",
-        description: "Failed to fetch news. Using cached or fallback data.",
+        description: "Failed to fetch content. Using cached or fallback data.",
         variant: "destructive",
       });
       // If fetch fails, load from localStorage or use fallback data
@@ -93,7 +93,7 @@ export function NewsView() {
       } else {
         // Create fallback data with mock news for each category
         const fallbackData: Record<string, NewsArticle[]> = {};
-        const categories = ["top", "business", "health", "technology"];
+        const categories = Object.keys(rssSources[selectedFeed as keyof typeof rssSources].feeds);
         categories.forEach(category => {
           fallbackData[category] = getMockNews(category);
         });
@@ -106,7 +106,7 @@ export function NewsView() {
 
   // Load initial data
   useEffect(() => {
-    const savedSource = localStorage.getItem('news-source') || "reuters";
+    const savedSource = localStorage.getItem('news-source') || "the-daily";
     setSelectedFeed(savedSource);
     
     const saved = localStorage.getItem('news-articles');
@@ -125,7 +125,7 @@ export function NewsView() {
 
   const categories = Object.keys(newsArticles).length > 0 ? 
     Object.keys(newsArticles) : 
-    ["top", "business", "health", "technology"];
+    Object.keys(rssSources[selectedFeed as keyof typeof rssSources].feeds);
 
   return (
     <div className="animate-fade-in">
