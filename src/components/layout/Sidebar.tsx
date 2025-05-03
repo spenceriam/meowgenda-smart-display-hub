@@ -115,7 +115,7 @@ export function Sidebar({ open, setOpen }: SidebarProps) {
                 MeowGenda v1.0.0
               </div>
             ) : (
-              <div className="flex justify-center rotate-90 mt-8 text-primary text-sm font-medium">
+              <div className="text-primary text-sm font-medium text-center">
                 MEOWGENDA
               </div>
             )}
