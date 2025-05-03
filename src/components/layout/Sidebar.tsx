@@ -78,7 +78,7 @@ export function Sidebar({
               {navItems.map(item => {
               const isActive = location.pathname === item.path;
               return <Link key={item.path} to={item.path} className={cn("group flex items-center py-2 px-2 rounded-lg transition-colors relative", isActive ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground hover:bg-accent")}>
-                    <div className="flex items-center">
+                    <div className={cn("flex items-center", !isMobile && "w-full justify-center")}>
                       <item.icon className="h-5 w-5 shrink-0" />
                       {isMobile && <span className="ml-3 text-base">{item.label}</span>}
                     </div>
