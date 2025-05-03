@@ -99,7 +99,7 @@ export function Sidebar({
               </div>
             ) : (
               <div className="flex flex-col items-center space-y-4">
-                <div className="dynapuff-text text-primary text-2xl text-center transform -rotate-90 origin-center my-4 -mt-96">
+                <div className="dynapuff-text text-primary text-2xl text-center transform -rotate-90 origin-center my-4">
                   meowgenda
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} className="rounded-full">
