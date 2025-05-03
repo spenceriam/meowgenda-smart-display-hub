@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Settings } from "@/types";
-import { Apple, Calendar, Google, Mail, Moon, Outlook, Sun } from "lucide-react";
+import { Apple, Calendar, Mail, Moon, Sun } from "lucide-react";
 import ColorSelector from "./ColorSelector";
 
 export function SettingsView() {
