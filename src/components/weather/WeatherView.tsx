@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -63,7 +64,7 @@ export function WeatherView() {
     setIsLoading(true);
     
     try {
-      // Call the Supabase Edge Function instead of directly calling WeatherAPI
+      // Call the Supabase Edge Function
       const { data, error } = await supabase.functions.invoke('weather', {
         body: { location: searchLocation }
       });
@@ -107,6 +108,10 @@ export function WeatherView() {
       };
       
       setWeather(weatherData);
+      toast({
+        title: "Weather updated",
+        description: `Latest weather for ${weatherData.location.name}`,
+      });
       
     } catch (error) {
       console.error("Error fetching weather:", error);
