@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -65,7 +66,7 @@ export function Sidebar({
         <div className="flex flex-col h-full">
           <div className="p-4 flex items-center justify-between h-16">
             {isMobile && <div className="dynapuff-heading text-xl text-primary">
-                MEOWGENDA
+                meowgenda
               </div>}
             <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} className={cn("rounded-full", isMobile ? "ml-auto" : "mx-auto mt-2")}>
               {isMobile ? <X size={20} /> : <Menu size={20} />}
@@ -93,7 +94,7 @@ export function Sidebar({
             {isMobile ? <div className="text-xs text-muted-foreground">
                 MeowGenda v1.0.0
               </div> : <div className="dynapuff-text text-primary text-sm text-center transform -rotate-90 origin-center my-4">
-                MEOWGENDA
+                meowgenda
               </div>}
           </div>
         </div>
