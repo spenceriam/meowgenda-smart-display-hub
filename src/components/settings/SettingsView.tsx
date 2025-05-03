@@ -98,7 +98,10 @@ export function SettingsView() {
       setSettings(prev => ({
         ...prev,
         connectedCalendars: {
-          ...prev.connectedCalendars,
+          // Make sure we initialize all required properties
+          google: prev.connectedCalendars?.google ?? false,
+          apple: prev.connectedCalendars?.apple ?? false,
+          outlook: prev.connectedCalendars?.outlook ?? false,
           [service]: false
         }
       }));
@@ -108,7 +111,10 @@ export function SettingsView() {
       setSettings(prev => ({
         ...prev,
         connectedCalendars: {
-          ...(prev.connectedCalendars || {}),
+          // Make sure we initialize all required properties
+          google: prev.connectedCalendars?.google ?? false,
+          apple: prev.connectedCalendars?.apple ?? false,
+          outlook: prev.connectedCalendars?.outlook ?? false,
           [service]: true
         }
       }));
