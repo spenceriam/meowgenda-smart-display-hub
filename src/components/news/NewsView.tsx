@@ -11,7 +11,7 @@ import { NewsCategoryTabs } from "./NewsCategoryTabs";
 export function NewsView() {
   const [newsArticles, setNewsArticles] = React.useState<Record<string, NewsArticle[]>>({});
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const [selectedFeed, setSelectedFeed] = React.useState<string>("the-daily");
+  const [selectedFeed, setSelectedFeed] = React.useState<string>("bbc");
   const { toast } = useToast();
   
   const rssSources = {
@@ -19,7 +19,7 @@ export function NewsView() {
       name: "The Daily",
       feeds: {
         "episodes": "http://rss.art19.com/the-daily",
-        "recent": "http://rss.art19.com/the-daily",
+        "recent": "http://rss.art19.com/the-daily?limit=10",
         "popular": "http://rss.art19.com/the-daily",
         "featured": "http://rss.art19.com/the-daily",
       }
@@ -50,19 +50,34 @@ export function NewsView() {
       const sourceFeeds = rssSources[source as keyof typeof rssSources].feeds;
       const categories = Object.keys(sourceFeeds);
       
-      const articlesPromises = categories.map(async (category) => {
-        const feedUrl = sourceFeeds[category as keyof typeof sourceFeeds];
-        let articles = await fetchRssFeed(feedUrl, category);
-        
-        // Use mock data if no articles were fetched
-        if (articles.length === 0) {
-          articles = getMockNews(category);
-        }
-        
-        return { category, articles };
+      // Add a timeout for the entire operation
+      const timeoutPromise = new Promise<{ category: string, articles: NewsArticle[] }[]>((_, reject) => {
+        setTimeout(() => reject(new Error("Fetching news timeout")), 15000);
       });
       
-      const results = await Promise.all(articlesPromises);
+      const articlesPromises = categories.map(async (category) => {
+        const feedUrl = sourceFeeds[category as keyof typeof sourceFeeds];
+        try {
+          let articles = await fetchRssFeed(feedUrl, category);
+          
+          // Use mock data if no articles were fetched
+          if (articles.length === 0) {
+            articles = getMockNews(category);
+          }
+          
+          return { category, articles };
+        } catch (e) {
+          console.log(`Error fetching ${category} for ${source}:`, e);
+          return { category, articles: getMockNews(category) };
+        }
+      });
+      
+      // Race between the fetch operations and timeout
+      const results = await Promise.race([
+        Promise.all(articlesPromises),
+        timeoutPromise
+      ]);
+      
       const newsData: Record<string, NewsArticle[]> = {};
       
       results.forEach(({ category, articles }) => {
@@ -104,7 +119,8 @@ export function NewsView() {
 
   // Load initial data
   useEffect(() => {
-    const savedSource = localStorage.getItem('news-source') || "the-daily";
+    // Default to BBC as it's more reliable than podcast feeds
+    const savedSource = localStorage.getItem('news-source') || "bbc";
     setSelectedFeed(savedSource);
     
     const saved = localStorage.getItem('news-articles');

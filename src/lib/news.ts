@@ -5,9 +5,18 @@ import { v4 as uuidv4 } from "uuid";
 // Helper function to parse RSS and convert to our NewsArticle format
 export async function fetchRssFeed(feedUrl: string, category: string): Promise<NewsArticle[]> {
   try {
-    // Use a more reliable CORS proxy for client-side requests
+    // Use a more reliable RSS feed parser API
     const corsProxy = "https://api.rss2json.com/v1/api.json?rss_url=";
-    const response = await fetch(`${corsProxy}${encodeURIComponent(feedUrl)}`);
+    
+    // Add a timeout to prevent hanging requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`${corsProxy}${encodeURIComponent(feedUrl)}`, {
+      signal: controller.signal
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       throw new Error(`Failed to fetch RSS feed: ${response.statusText}`);
@@ -47,24 +56,38 @@ export async function fetchRssFeed(feedUrl: string, category: string): Promise<N
 
 // Add mock news data as a fallback
 export const getMockNews = (category: string): NewsArticle[] => {
-  return [
-    {
-      id: uuidv4(),
-      title: "Sample News Article",
-      summary: "This is a sample news article that appears when we can't load real news. The RSS feed may be temporarily unavailable.",
-      url: "#",
-      source: "Fallback Source",
-      publishedAt: new Date().toISOString(),
-      category
-    },
-    {
-      id: uuidv4(),
-      title: "Unable to Load News Feed",
-      summary: "We're having trouble connecting to the news sources. Please try again later or check your internet connection.",
-      url: "#",
-      source: "System Message",
-      publishedAt: new Date().toISOString(),
-      category
-    }
-  ];
+  const mockTitles = {
+    "the-daily": [
+      "Today's Top Story from The Daily",
+      "Breaking News Coverage",
+      "Expert Analysis on Current Events"
+    ],
+    "bbc": [
+      "Global News Update from BBC",
+      "International Development Report",
+      "Special Investigation: World Affairs"
+    ],
+    "npr": [
+      "NPR Morning Edition Highlights",
+      "In-depth Coverage from NPR",
+      "This Week in Politics - NPR Analysis"
+    ]
+  };
+  
+  const source = category.includes("episode") || category.includes("recent") ? "The Daily" :
+                category.includes("top") ? "Top Headlines" :
+                category.includes("business") ? "Business News" :
+                category.includes("health") ? "Health Updates" :
+                category.includes("technology") ? "Tech News" : "News Source";
+  
+  return Array(3).fill(null).map((_, i) => ({
+    id: uuidv4(),
+    title: mockTitles[source.toLowerCase().includes("daily") ? "the-daily" : 
+                     source.toLowerCase().includes("bbc") ? "bbc" : "npr"][i % 3],
+    summary: `This is a fallback article for the ${category} category. We couldn't load the actual content from ${source} at this time. Please try again later or check your internet connection.`,
+    url: "#",
+    source,
+    publishedAt: new Date().toISOString(),
+    category
+  }));
 };
