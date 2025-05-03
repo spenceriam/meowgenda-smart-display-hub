@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { CalendarEvent } from "@/types";
+import { CalendarEvent, CalendarEventFormData } from "@/types";
 import { cn } from "@/lib/utils";
 
 interface CalendarEventListProps {
@@ -27,9 +27,11 @@ interface CalendarEventListProps {
 
 export default function CalendarEventList({ date, events, onAddEvent, onDeleteEvent }: CalendarEventListProps) {
   const [open, setOpen] = React.useState(false);
-  const [newEvent, setNewEvent] = React.useState<Partial<CalendarEvent>>({
+  const [newEvent, setNewEvent] = React.useState<CalendarEventFormData>({
     title: "",
     description: "",
+    startTime: "09:00",
+    endTime: "10:00",
     color: "#50C2A7"
   });
 
@@ -102,7 +104,7 @@ export default function CalendarEventList({ date, events, onAddEvent, onDeleteEv
                     <Input
                       id="startTime"
                       type="time"
-                      value={newEvent.startTime || "09:00"}
+                      value={newEvent.startTime}
                       onChange={(e) => setNewEvent({ ...newEvent, startTime: e.target.value })}
                     />
                   </div>
@@ -111,7 +113,7 @@ export default function CalendarEventList({ date, events, onAddEvent, onDeleteEv
                     <Input
                       id="endTime"
                       type="time"
-                      value={newEvent.endTime || "10:00"}
+                      value={newEvent.endTime}
                       onChange={(e) => setNewEvent({ ...newEvent, endTime: e.target.value })}
                     />
                   </div>

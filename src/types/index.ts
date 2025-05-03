@@ -9,6 +9,15 @@ export interface CalendarEvent {
   color: string;
 }
 
+// For form handling in CalendarEventList
+export interface CalendarEventFormData {
+  title: string;
+  description?: string;
+  startTime: string; // for time input "HH:MM"
+  endTime: string; // for time input "HH:MM"
+  color: string;
+}
+
 // Notes types
 export interface Note {
   id: string;
