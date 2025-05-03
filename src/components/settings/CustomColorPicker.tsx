@@ -29,13 +29,11 @@ export default function CustomColorPicker({ value, onChange }: CustomColorPicker
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="w-full flex justify-between">
-          <div className="flex items-center gap-2">
-            <Palette className="h-4 w-4" />
-            <span>Custom Color</span>
-          </div>
+        <Button variant="outline" className="inline-flex items-center gap-2">
+          <Palette className="h-4 w-4" />
+          <span>Custom Color</span>
           <div 
-            className="h-4 w-4 rounded-full border" 
+            className="h-4 w-4 rounded-full border ml-2" 
             style={{ backgroundColor: value || "#FFFFFF" }}
           />
         </Button>
