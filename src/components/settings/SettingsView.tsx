@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -89,7 +90,8 @@ export function SettingsView() {
 
   const connectCalendarService = (service: 'google' | 'apple' | 'outlook') => {
     // This would typically open an OAuth flow in a real application
-    const isConnected = settings.connectedCalendars[service];
+    // Make sure connectedCalendars exists before trying to access its properties
+    const isConnected = settings.connectedCalendars?.[service] || false;
     
     if (isConnected) {
       // Disconnect
@@ -106,7 +108,7 @@ export function SettingsView() {
       setSettings(prev => ({
         ...prev,
         connectedCalendars: {
-          ...prev.connectedCalendars,
+          ...(prev.connectedCalendars || {}),
           [service]: true
         }
       }));
@@ -128,6 +130,9 @@ export function SettingsView() {
       }
     });
   };
+
+  // Make sure connectedCalendars exists before trying to access its properties
+  const connectedCalendars = settings.connectedCalendars || { google: false, apple: false, outlook: false };
 
   return (
     <div className="animate-fade-in">
@@ -280,11 +285,11 @@ export function SettingsView() {
                 </div>
               </div>
               <Button 
-                variant={settings.connectedCalendars.google ? "destructive" : "outline"}
+                variant={connectedCalendars.google ? "destructive" : "outline"}
                 onClick={() => connectCalendarService('google')}
                 className="min-w-24"
               >
-                {settings.connectedCalendars.google ? "Disconnect" : "Connect"}
+                {connectedCalendars.google ? "Disconnect" : "Connect"}
               </Button>
             </div>
             
@@ -299,11 +304,11 @@ export function SettingsView() {
                 </div>
               </div>
               <Button 
-                variant={settings.connectedCalendars.apple ? "destructive" : "outline"}
+                variant={connectedCalendars.apple ? "destructive" : "outline"}
                 onClick={() => connectCalendarService('apple')}
                 className="min-w-24"
               >
-                {settings.connectedCalendars.apple ? "Disconnect" : "Connect"}
+                {connectedCalendars.apple ? "Disconnect" : "Connect"}
               </Button>
             </div>
             
@@ -318,11 +323,11 @@ export function SettingsView() {
                 </div>
               </div>
               <Button 
-                variant={settings.connectedCalendars.outlook ? "destructive" : "outline"}
+                variant={connectedCalendars.outlook ? "destructive" : "outline"}
                 onClick={() => connectCalendarService('outlook')}
                 className="min-w-24"
               >
-                {settings.connectedCalendars.outlook ? "Disconnect" : "Connect"}
+                {connectedCalendars.outlook ? "Disconnect" : "Connect"}
               </Button>
             </div>
           </CardContent>
