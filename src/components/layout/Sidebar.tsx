@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -80,7 +81,7 @@ export function Sidebar({
           <div className="p-4">
             {isMobile ? <div className="text-xs text-muted-foreground">
                 MeowGenda v1.0.0
-              </div> : <div className="text-primary text-sm font-knewave text-center">
+              </div> : <div className="text-primary text-sm font-knewave text-center transform -rotate-90 origin-center my-4">
                 MEOWGENDA
               </div>}
           </div>
