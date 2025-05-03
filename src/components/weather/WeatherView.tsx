@@ -3,18 +3,24 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Search, MapPin } from "lucide-react";
+import { Search, MapPin, Settings } from "lucide-react";
 import { WeatherData } from "@/types";
 import WeatherIcon from "./WeatherIcon";
 import WeatherForecast from "./WeatherForecast";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export function WeatherView() {
   const { toast } = useToast();
   const [location, setLocation] = React.useState("");
   const [isLocating, setIsLocating] = React.useState(false);
-  const [units, setUnits] = React.useState<"metric" | "imperial">("metric"); // metric: C/km/h, imperial: F/mph
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [apiKey, setApiKey] = React.useState(() => localStorage.getItem("weatherApiKey") || "");
+  const [units, setUnits] = React.useState<"metric" | "imperial">(() => {
+    return localStorage.getItem("weatherUnits") as "metric" | "imperial" || "metric";
+  });
+  const [showApiKeyDialog, setShowApiKeyDialog] = React.useState(false);
   const [weather, setWeather] = React.useState<WeatherData | null>(() => {
     const saved = localStorage.getItem('weather');
     if (saved) return JSON.parse(saved);
@@ -52,68 +58,90 @@ export function WeatherView() {
     }
   }, [weather]);
 
+  React.useEffect(() => {
+    localStorage.setItem('weatherUnits', units);
+  }, [units]);
+
+  const saveApiKey = (key: string) => {
+    setApiKey(key);
+    localStorage.setItem("weatherApiKey", key);
+    setShowApiKeyDialog(false);
+    toast({
+      title: "API Key Saved",
+      description: "Your WeatherAPI key has been saved securely to your browser.",
+    });
+  };
+
+  const fetchWeatherData = async (searchLocation: string) => {
+    if (!apiKey) {
+      setShowApiKeyDialog(true);
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      // Real API call to WeatherAPI.com
+      const url = `https://api.weatherapi.com/v1/forecast.json?key=${apiKey}&q=${encodeURIComponent(searchLocation)}&days=3&aqi=no&alerts=no`;
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Weather API error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      // Transform API data to match our WeatherData type
+      const weatherData: WeatherData = {
+        location: {
+          name: data.location.name,
+          country: data.location.country
+        },
+        current: {
+          temp_c: data.current.temp_c,
+          temp_f: data.current.temp_f,
+          condition: {
+            text: data.current.condition.text,
+            code: data.current.condition.code
+          },
+          wind_mph: data.current.wind_mph,
+          wind_kph: data.current.wind_kph,
+          humidity: data.current.humidity,
+          feelslike_c: data.current.feelslike_c,
+          feelslike_f: data.current.feelslike_f
+        },
+        forecast: data.forecast.forecastday.map((day: any) => ({
+          date: day.date,
+          maxtemp_c: day.day.maxtemp_c,
+          mintemp_c: day.day.mintemp_c,
+          condition: {
+            text: day.day.condition.text,
+            code: day.day.condition.code
+          }
+        }))
+      };
+      
+      setWeather(weatherData);
+      
+    } catch (error) {
+      console.error("Error fetching weather:", error);
+      toast({
+        title: "Error fetching weather",
+        description: error instanceof Error ? error.message : "Failed to fetch weather data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!location) return;
     
-    // In a real app, you'd fetch from a weather API
-    // For this demo, we'll simulate a search with mock data
-    // Add a small delay to simulate API call
-    setWeather(null);
-    
-    setTimeout(() => {
-      const mockWeather: WeatherData = {
-        location: {
-          name: location,
-          country: "Demo Country"
-        },
-        current: {
-          temp_c: Math.round(15 + Math.random() * 15),
-          temp_f: Math.round(59 + Math.random() * 27),
-          condition: {
-            text: ["Sunny", "Partly cloudy", "Cloudy", "Light rain"][Math.floor(Math.random() * 4)],
-            code: [1000, 1003, 1006, 1063][Math.floor(Math.random() * 4)]
-          },
-          wind_mph: Math.round(5 + Math.random() * 15),
-          wind_kph: Math.round(8 + Math.random() * 24),
-          humidity: Math.round(40 + Math.random() * 40),
-          feelslike_c: Math.round(14 + Math.random() * 15),
-          feelslike_f: Math.round(57 + Math.random() * 27)
-        },
-        forecast: [
-          { 
-            date: "2023-05-04", 
-            maxtemp_c: Math.round(18 + Math.random() * 10),
-            mintemp_c: Math.round(10 + Math.random() * 8),
-            condition: { 
-              text: ["Sunny", "Partly cloudy"][Math.floor(Math.random() * 2)],
-              code: [1000, 1003][Math.floor(Math.random() * 2)]
-            }
-          },
-          { 
-            date: "2023-05-05", 
-            maxtemp_c: Math.round(18 + Math.random() * 10),
-            mintemp_c: Math.round(10 + Math.random() * 8),
-            condition: { 
-              text: ["Cloudy", "Light rain"][Math.floor(Math.random() * 2)], 
-              code: [1006, 1063][Math.floor(Math.random() * 2)]
-            }
-          },
-          { 
-            date: "2023-05-06", 
-            maxtemp_c: Math.round(18 + Math.random() * 10),
-            mintemp_c: Math.round(10 + Math.random() * 8), 
-            condition: { 
-              text: ["Sunny", "Light rain"][Math.floor(Math.random() * 2)],
-              code: [1000, 1063][Math.floor(Math.random() * 2)]
-            }
-          },
-        ]
-      };
-      
-      setWeather(mockWeather);
-      setLocation("");
-    }, 500);
+    await fetchWeatherData(location);
+    setLocation("");
   };
 
   const getUserLocation = () => {
@@ -128,70 +156,18 @@ export function WeatherView() {
 
     setIsLocating(true);
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        // In a real app, you'd use these coordinates to fetch weather data
-        // For this demo, we'll simulate with random data
+      async (position) => {
         const latitude = position.coords.latitude;
         const longitude = position.coords.longitude;
+        const locationString = `${latitude},${longitude}`;
         
-        // Simulate a location-based weather search
-        setTimeout(() => {
-          const mockWeather: WeatherData = {
-            location: {
-              name: "Your Location",
-              country: "Current Position"
-            },
-            current: {
-              temp_c: Math.round(15 + Math.random() * 15),
-              temp_f: Math.round(59 + Math.random() * 27),
-              condition: {
-                text: ["Sunny", "Partly cloudy", "Cloudy", "Light rain"][Math.floor(Math.random() * 4)],
-                code: [1000, 1003, 1006, 1063][Math.floor(Math.random() * 4)]
-              },
-              wind_mph: Math.round(5 + Math.random() * 15),
-              wind_kph: Math.round(8 + Math.random() * 24),
-              humidity: Math.round(40 + Math.random() * 40),
-              feelslike_c: Math.round(14 + Math.random() * 15),
-              feelslike_f: Math.round(57 + Math.random() * 27)
-            },
-            forecast: [
-              { 
-                date: "2023-05-04", 
-                maxtemp_c: Math.round(18 + Math.random() * 10),
-                mintemp_c: Math.round(10 + Math.random() * 8),
-                condition: { 
-                  text: ["Sunny", "Partly cloudy"][Math.floor(Math.random() * 2)],
-                  code: [1000, 1003][Math.floor(Math.random() * 2)]
-                }
-              },
-              { 
-                date: "2023-05-05", 
-                maxtemp_c: Math.round(18 + Math.random() * 10),
-                mintemp_c: Math.round(10 + Math.random() * 8),
-                condition: { 
-                  text: ["Cloudy", "Light rain"][Math.floor(Math.random() * 2)], 
-                  code: [1006, 1063][Math.floor(Math.random() * 2)]
-                }
-              },
-              { 
-                date: "2023-05-06", 
-                maxtemp_c: Math.round(18 + Math.random() * 10),
-                mintemp_c: Math.round(10 + Math.random() * 8), 
-                condition: { 
-                  text: ["Sunny", "Light rain"][Math.floor(Math.random() * 2)],
-                  code: [1000, 1063][Math.floor(Math.random() * 2)]
-                }
-              },
-            ]
-          };
-          
-          setWeather(mockWeather);
-          toast({
-            title: "Location detected",
-            description: `Weather for your current location (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`,
-          });
-          setIsLocating(false);
-        }, 1000);
+        await fetchWeatherData(locationString);
+        
+        toast({
+          title: "Location detected",
+          description: `Weather for your current location (${latitude.toFixed(2)}, ${longitude.toFixed(2)})`,
+        });
+        setIsLocating(false);
       },
       (error) => {
         setIsLocating(false);
@@ -222,16 +198,47 @@ export function WeatherView() {
     <div className="animate-fade-in">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Weather</h1>
-        <ToggleGroup 
-          type="single" 
-          value={units} 
-          onValueChange={(value) => {
-            if (value) setUnits(value as "metric" | "imperial");
-          }}
-        >
-          <ToggleGroupItem value="metric">°C / km/h</ToggleGroupItem>
-          <ToggleGroupItem value="imperial">°F / mph</ToggleGroupItem>
-        </ToggleGroup>
+        <div className="flex items-center gap-2">
+          <ToggleGroup 
+            type="single" 
+            value={units} 
+            onValueChange={(value) => {
+              if (value) setUnits(value as "metric" | "imperial");
+            }}
+          >
+            <ToggleGroupItem value="metric">°C / km/h</ToggleGroupItem>
+            <ToggleGroupItem value="imperial">°F / mph</ToggleGroupItem>
+          </ToggleGroup>
+          
+          <Dialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Settings className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Weather API Settings</DialogTitle>
+                <DialogDescription>
+                  Enter your WeatherAPI.com API key. Sign up at <a href="https://www.weatherapi.com" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">weatherapi.com</a>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Input
+                    id="apiKey"
+                    placeholder="Your API Key"
+                    value={apiKey}
+                    onChange={(e) => setApiKey(e.target.value)}
+                  />
+                </div>
+                <Button onClick={() => saveApiKey(apiKey)} disabled={!apiKey.trim()}>
+                  Save
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       <div className="mb-6">
@@ -245,12 +252,12 @@ export function WeatherView() {
               className="pl-10"
             />
           </div>
-          <Button type="submit" disabled={!location.trim()}>Search</Button>
+          <Button type="submit" disabled={!location.trim() || isLoading}>Search</Button>
           <Button 
             type="button" 
             variant="outline" 
             onClick={getUserLocation} 
-            disabled={isLocating}
+            disabled={isLocating || isLoading}
           >
             <MapPin className="h-4 w-4 mr-2" />
             {isLocating ? "Detecting..." : "Use my location"}
@@ -258,7 +265,26 @@ export function WeatherView() {
         </form>
       </div>
 
-      {weather ? (
+      {!apiKey && !weather && (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <div className="text-center space-y-2">
+              <p>You need a WeatherAPI.com API key to fetch weather data.</p>
+              <Button onClick={() => setShowApiKeyDialog(true)}>
+                Set API Key
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {isLoading ? (
+        <Card className="text-center py-16">
+          <CardContent>
+            <p className="text-muted-foreground">Loading weather data...</p>
+          </CardContent>
+        </Card>
+      ) : weather ? (
         <div className="space-y-6">
           <Card className="overflow-hidden">
             <div className="bg-gradient-to-r from-meow-mint to-meow-blue p-6 text-white">
