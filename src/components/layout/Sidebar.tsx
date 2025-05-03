@@ -65,7 +65,7 @@ export function Sidebar({
       <aside className={cn("fixed top-0 left-0 z-50 h-full transition-all duration-300 ease-in-out", open ? "translate-x-0" : "-translate-x-full", isMobile ? "w-64 bg-background shadow-xl" : "w-16 bg-background border-r")}>
         <div className="flex flex-col h-full">
           <div className="p-4 flex items-center justify-between h-16">
-            {isMobile && <div className="dynapuff-heading text-xl text-primary">
+            {isMobile && <div className="dynapuff-heading text-2xl text-primary">
                 meowgenda
               </div>}
             <Button variant="ghost" size="icon" onClick={() => setOpen(!open)} className={cn("rounded-full", isMobile ? "ml-auto" : "mx-auto mt-2")}>
@@ -93,7 +93,7 @@ export function Sidebar({
           <div className="p-4">
             {isMobile ? <div className="text-xs text-muted-foreground">
                 MeowGenda v1.0.0
-              </div> : <div className="dynapuff-text text-primary text-sm text-center transform -rotate-90 origin-center my-4">
+              </div> : <div className="dynapuff-text text-primary text-2xl text-center transform -rotate-90 origin-center my-4">
                 meowgenda
               </div>}
           </div>
