@@ -62,7 +62,22 @@ This project is built with:
 
 ## How can I deploy this project?
 
+You have two options for deploying this project:
+
+### Deploy with Lovable
+
 Simply open [Lovable](https://lovable.dev/projects/db32e035-95b6-4c34-a86d-dc1cc35d800a) and click on Share -> Publish.
+
+### Deploy with GitHub Pages
+
+This repository is configured to automatically deploy to GitHub Pages whenever changes are pushed to the `main` branch. The deployed site can be accessed at: https://spenceriam.github.io/meowgenda-smart-display-hub/
+
+If you want to deploy manually:
+
+1. Make sure you have the necessary permissions to the repository
+2. Go to the repository's "Actions" tab
+3. Select the "Deploy to GitHub Pages" workflow
+4. Click "Run workflow" and select the branch you want to deploy
 
 ## Can I connect a custom domain to my Lovable project?
 
