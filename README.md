@@ -1,73 +1,112 @@
-# Welcome to your Lovable project
+# MeowGenda Smart Display Hub
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/db32e035-95b6-4c34-a86d-dc1cc35d800a
+MeowGenda is a modern, all-in-one personal information hub designed to help you stay organized and informed. It provides a centralized dashboard for managing your daily activities, notes, tasks, and more.
 
-## How can I edit this code?
+### Key Features
 
-There are several ways of editing your application.
+- **Calendar**: Manage events and appointments with an interactive calendar
+- **Notes**: Create, edit, and organize personal notes with color coding
+- **Tasks**: Track to-do items with completion status
+- **Weather**: View current weather conditions and forecasts
+- **News**: Browse news from various RSS feed sources by categories
+- **Settings**: Customize the application appearance and integrations
 
-**Use Lovable**
+## Getting Started
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/db32e035-95b6-4c34-a86d-dc1cc35d800a) and start prompting.
+### Prerequisites
 
-Changes made via Lovable will be committed automatically to this repo.
+- Node.js & npm - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Installation
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Step 1: Clone the repository
+git clone https://github.com/spenceriam/meowgenda-smart-display-hub.git
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd meowgenda-smart-display-hub
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install the necessary dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Step 4: Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at http://localhost:8080
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Development
+
+### Available Scripts
+
+- `npm run dev` - Start the development server
+- `npm run build` - Create a production build
+- `npm run build:dev` - Create a development build
+- `npm run lint` - Run ESLint to check for code issues
+- `npm run preview` - Preview the production build locally
+
+## Technologies
+
+MeowGenda is built with modern web technologies:
+
+- **React 18** - UI library
+- **TypeScript** - Type-safe JavaScript
+- **Vite** - Fast build tool and dev server
+- **React Router** - Navigation and routing
+- **Tailwind CSS** - Utility-first styling
+- **shadcn/ui** - UI component collection
+- **React Query** - Data fetching and state management
+- **Lucide React** - Icon library
+- **date-fns** - Date manipulation
+
+## Application Structure
+
+The application is organized into feature-based components:
+
+- `/src/components` - UI components organized by feature
+- `/src/hooks` - Custom React hooks
+- `/src/lib` - Utility functions and libraries
+- `/src/pages` - Main route pages
+- `/src/types` - TypeScript type definitions
+
+## Data Persistence
+
+MeowGenda uses the browser's localStorage to persist data, including:
+
+- Notes
+- Tasks
+- Calendar events
+- News sources and articles
+- Weather location and data
+- Application settings
+
+## Responsive Design
+
+The application is fully responsive and supports both desktop and mobile devices:
+
+- Collapsible sidebar navigation
+- Adaptive layouts for different screen sizes
+- Mobile-optimized UI elements and interactions
+
+## Editing and Contributing
+
+There are several ways to edit and contribute to this codebase:
+
+**Use your preferred IDE**
+
+Clone this repository and make changes locally using your preferred development environment.
+
+**Edit directly in GitHub**
+
+- Navigate to the desired file(s)
+- Click the "Edit" button (pencil icon) at the top right of the file view
+- Make your changes and commit them
 
 **Use GitHub Codespaces**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/db32e035-95b6-4c34-a86d-dc1cc35d800a) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+- Navigate to the main page of your repository
+- Click on the "Code" button (green button) near the top right
+- Select the "Codespaces" tab
+- Click on "New codespace" to launch a new Codespace environment
